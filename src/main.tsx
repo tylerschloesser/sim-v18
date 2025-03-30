@@ -34,6 +34,46 @@ app.init({
   resizeTo: window,
 })
 
-const g = app.stage.addChild(new Graphics())
-g.rect(0, 0, 100, 100)
+const g = app.stage.addChild(
+  new Graphics({ visible: false }),
+)
+g.circle(0, 0, 10)
 g.fill('blue')
+
+function onPointerMove(ev: PointerEvent) {
+  g.position.set(ev.clientX, ev.clientY)
+}
+
+document.addEventListener('pointerdown', (ev) => {
+  g.visible = true
+  g.position.set(ev.clientX, ev.clientY)
+
+  const controller = new AbortController()
+  const { signal } = controller
+
+  signal.addEventListener('abort', () => {
+    g.visible = false
+  })
+
+  document.addEventListener('pointermove', onPointerMove, {
+    signal,
+  })
+
+  document.addEventListener(
+    'pointerup',
+    () => controller.abort(),
+    { signal },
+  )
+
+  document.addEventListener(
+    'pointercancel',
+    () => controller.abort(),
+    { signal },
+  )
+
+  document.addEventListener(
+    'pointerleave',
+    () => controller.abort(),
+    { signal },
+  )
+})
