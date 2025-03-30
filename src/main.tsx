@@ -1,8 +1,9 @@
-import { Application, Graphics } from 'pixi.js'
+import { Application } from 'pixi.js'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import invariant from 'tiny-invariant'
 import './index.css'
+import { PointerContainer } from './pointer-container'
 import { Pointer } from './schema'
 import { Vec2 } from './vec2'
 
@@ -36,14 +37,9 @@ app.init({
   resizeTo: window,
 })
 
-const g = app.stage.addChild(
-  new Graphics({ visible: false }),
+const pointerContainer = app.stage.addChild(
+  new PointerContainer(),
 )
-g.circle(0, 0, 50)
-g.stroke({
-  color: 'blue',
-  width: 4,
-})
 
 let pointer: Pointer | null = null
 
@@ -60,29 +56,29 @@ function onPointerMove(ev: PointerEvent) {
     invariant(pointer.state === 'drag')
     pointer.position = new Vec2(ev.clientX, ev.clientY)
   }
-  g.position.set(ev.clientX, ev.clientY)
+  pointerContainer.update(pointer)
 }
 
 document.addEventListener('pointerdown', (ev) => {
-  if (!pointer) {
-    pointer = {
-      id: ev.pointerId,
-      state: 'down',
-      position: new Vec2(ev.clientX, ev.clientY),
-    }
-  } else {
+  if (pointer) {
     invariant(pointer.id !== ev.pointerId)
+    return
   }
 
-  g.visible = true
-  g.position.set(ev.clientX, ev.clientY)
+  pointer = {
+    id: ev.pointerId,
+    state: 'down',
+    position: new Vec2(ev.clientX, ev.clientY),
+  }
+
+  pointerContainer.update(pointer)
 
   const controller = new AbortController()
   const { signal } = controller
 
   signal.addEventListener('abort', () => {
-    g.visible = false
     pointer = null
+    pointerContainer.update(pointer)
   })
 
   function filterPointerId(fn: (ev: PointerEvent) => void) {
