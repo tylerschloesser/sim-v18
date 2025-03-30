@@ -2,6 +2,11 @@ import { Application } from 'pixi.js'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import invariant from 'tiny-invariant'
+import {
+  DRAG_VELOCITY_SCALE,
+  ASCENDING_GRAVITY_SCALE,
+  DESCENDING_GRAVITY_SCALE,
+} from './const'
 import { GridContainer } from './grid-container'
 import './index.css'
 import { PlayerContainer } from './player-container'
@@ -108,7 +113,10 @@ async function main() {
     signal.addEventListener('abort', () => {
       if (pointer?.state === 'drag') {
         const d = pointer.current.sub(pointer.origin)
-        player.velocity = d.div(scale).mul(-1)
+        player.velocity = d
+          .div(scale)
+          .mul(-1)
+          .mul(DRAG_VELOCITY_SCALE)
       }
       pointer = null
       pointerContainer.update(pointer)
@@ -125,12 +133,28 @@ async function main() {
       }
     }
 
-    // prettier-ignore
+    // add pointer listeners
     {
-      document.addEventListener('pointermove', filterPointerId(onPointerMove), { signal })
-      document.addEventListener('pointerup', filterPointerId(() => controller.abort()), { signal })
-      document.addEventListener('pointercancel', filterPointerId(() => controller.abort()), { signal })
-      document.addEventListener('pointerleave', filterPointerId(() => controller.abort()), { signal })
+      document.addEventListener(
+        'pointermove',
+        filterPointerId(onPointerMove),
+        { signal },
+      )
+      document.addEventListener(
+        'pointerup',
+        filterPointerId(() => controller.abort()),
+        { signal },
+      )
+      document.addEventListener(
+        'pointercancel',
+        filterPointerId(() => controller.abort()),
+        { signal },
+      )
+      document.addEventListener(
+        'pointerleave',
+        filterPointerId(() => controller.abort()),
+        { signal },
+      )
     }
   })
 
@@ -140,10 +164,28 @@ async function main() {
     const dt = Math.min(now - lastFrame, (1 / 30) * 1000)
     lastFrame = now
 
+    let acceleration = Vec2.ZERO
+    if (player.current.y < 0) {
+      const scale =
+        player.velocity.y < 0
+          ? ASCENDING_GRAVITY_SCALE
+          : DESCENDING_GRAVITY_SCALE
+      acceleration = new Vec2(0, 1).mul(scale)
+    }
+
+    if (acceleration.isNonZero()) {
+      player.velocity = player.velocity.add(
+        acceleration.mul(dt / 1000),
+      )
+    }
+
     if (player.velocity.isNonZero()) {
       player.current = player.current.add(
         player.velocity.mul(dt / 1000),
       )
+      if (player.current.y > 0) {
+        player.current = new Vec2(player.current.x, 0)
+      }
       camera = player.current
       gridContainer.update(camera)
     }
