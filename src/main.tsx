@@ -51,8 +51,11 @@ interface DragPointer {
 const g = app.stage.addChild(
   new Graphics({ visible: false }),
 )
-g.circle(0, 0, 10)
-g.fill('blue')
+g.circle(0, 0, 50)
+g.stroke({
+  color: 'blue',
+  width: 4,
+})
 
 type Pointer = DownPointer | DragPointer
 
