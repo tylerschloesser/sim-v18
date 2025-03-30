@@ -34,25 +34,33 @@ app.init({
   resizeTo: window,
 })
 
-const g = app.stage.addChild(
-  new Graphics({ visible: false }),
-)
-g.circle(0, 0, 10)
-g.fill('blue')
+const pointerIdToGraphics = new Map<number, Graphics>()
 
 function onPointerMove(ev: PointerEvent) {
+  const g = pointerIdToGraphics.get(ev.pointerId)
+  invariant(g)
   g.position.set(ev.clientX, ev.clientY)
 }
 
 document.addEventListener('pointerdown', (ev) => {
-  g.visible = true
-  g.position.set(ev.clientX, ev.clientY)
+  const g = app.stage.addChild(
+    new Graphics({
+      position: { x: ev.clientX, y: ev.clientY },
+    }),
+  )
+  g.circle(0, 0, 10)
+  g.fill('blue')
+
+  invariant(!pointerIdToGraphics.has(ev.pointerId))
+  pointerIdToGraphics.set(ev.pointerId, g)
 
   const controller = new AbortController()
   const { signal } = controller
 
   signal.addEventListener('abort', () => {
-    g.visible = false
+    invariant(pointerIdToGraphics.has(ev.pointerId))
+    pointerIdToGraphics.delete(ev.pointerId)
+    g.destroy()
   })
 
   // prettier-ignore
