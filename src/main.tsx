@@ -30,7 +30,7 @@ async function main() {
   const canvas = document.querySelector('canvas')
   invariant(canvas)
 
-  const camera = new Vec2(0, 0)
+  let camera = new Vec2(0, 0)
   const viewport = new Vec2(
     window.innerWidth,
     window.innerHeight,
@@ -42,10 +42,9 @@ async function main() {
     velocity: Vec2
   }
 
-  // @ts-expect-error
   const player: Player = {
     current: new Vec2(0, 0),
-    velocity: new Vec2(0, 0),
+    velocity: new Vec2(1, 0),
   }
 
   const app = new Application()
@@ -57,7 +56,6 @@ async function main() {
     resizeTo: window,
   })
 
-  // @ts-expect-error
   const gridContainer = app.stage.addChild(
     new GridContainer({ camera, viewport, scale }),
   )
@@ -129,9 +127,17 @@ async function main() {
   let lastFrame = performance.now()
   const callback: FrameRequestCallback = () => {
     const now = performance.now()
-    // @ts-expect-error
-    const dt = now - lastFrame
+    const dt = Math.min(now - lastFrame, (1 / 30) * 1000)
     lastFrame = now
+
+    if (player.velocity.isNonZero()) {
+      player.current = player.current.add(
+        player.velocity.mul(dt / 1000),
+      )
+      camera = player.current
+      gridContainer.update(camera)
+    }
+
     self.requestAnimationFrame(callback)
   }
   self.requestAnimationFrame(callback)
