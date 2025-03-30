@@ -55,25 +55,11 @@ document.addEventListener('pointerdown', (ev) => {
     g.visible = false
   })
 
-  document.addEventListener('pointermove', onPointerMove, {
-    signal,
-  })
-
-  document.addEventListener(
-    'pointerup',
-    () => controller.abort(),
-    { signal },
-  )
-
-  document.addEventListener(
-    'pointercancel',
-    () => controller.abort(),
-    { signal },
-  )
-
-  document.addEventListener(
-    'pointerleave',
-    () => controller.abort(),
-    { signal },
-  )
+  // prettier-ignore
+  {
+    document.addEventListener('pointermove', onPointerMove, { signal })
+    document.addEventListener('pointerup', () => controller.abort(), { signal })
+    document.addEventListener('pointercancel', () => controller.abort(), { signal })
+    document.addEventListener('pointerleave', () => controller.abort(), { signal })
+  }
 })
