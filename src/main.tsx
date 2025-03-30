@@ -2,6 +2,7 @@ import { Application } from 'pixi.js'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import invariant from 'tiny-invariant'
+import { GridContainer } from './grid-container'
 import './index.css'
 import { PointerContainer } from './pointer-container'
 import { Pointer } from './schema'
@@ -28,6 +29,13 @@ document.addEventListener(
 const canvas = document.querySelector('canvas')
 invariant(canvas)
 
+const camera = new Vec2(0, 0)
+const viewport = new Vec2(
+  window.innerWidth,
+  window.innerHeight,
+)
+const scale = 50
+
 const app = new Application()
 
 app.init({
@@ -39,6 +47,11 @@ app.init({
 
 const pointerContainer = app.stage.addChild(
   new PointerContainer(),
+)
+
+// @ts-expect-error
+const gridContainer = app.stage.addChild(
+  new GridContainer({ camera, viewport, scale }),
 )
 
 let pointer: Pointer | null = null
