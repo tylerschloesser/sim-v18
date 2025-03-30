@@ -15,13 +15,17 @@ createRoot(container).render(
 const log = document.createElement('pre')
 document.body.appendChild(log)
 
+function appendLog(message: string) {
+  log.textContent = message + '\n' + log.textContent
+}
+
 let lastFrame = self.performance.now()
 const callback: FrameRequestCallback = () => {
   const now = self.performance.now()
   const dt = now - lastFrame
   lastFrame = now
   if (dt > 18) {
-    log.textContent += `frame: ${dt.toFixed(2)}ms\n`
+    appendLog(`frame: ${dt.toFixed(2)}ms`)
   }
   self.requestAnimationFrame(callback)
 }
@@ -31,7 +35,7 @@ document.addEventListener(
   'pointerdown',
   (ev) => {
     ev.preventDefault()
-    log.textContent += `pointerdown: ${ev.clientX}, ${ev.clientY}\n`
+    appendLog(`pointerdown: ${ev.clientX}, ${ev.clientY}`)
   },
   { passive: false },
 )
