@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import invariant from 'tiny-invariant'
 import './index.css'
+import { Vec2 } from './vec2'
 
 const container = document.getElementById('root')
 invariant(container)
@@ -34,40 +35,81 @@ app.init({
   resizeTo: window,
 })
 
-const pointerIdToGraphics = new Map<number, Graphics>()
+interface DownPointer {
+  id: number
+  state: 'down'
+  position: Vec2
+}
+
+interface DragPointer {
+  id: number
+  state: 'drag'
+  origin: Vec2
+  position: Vec2
+}
+
+const g = app.stage.addChild(
+  new Graphics({ visible: false }),
+)
+g.circle(0, 0, 10)
+g.fill('blue')
+
+type Pointer = DownPointer | DragPointer
+
+let pointer: Pointer | null = null
 
 function onPointerMove(ev: PointerEvent) {
-  const g = pointerIdToGraphics.get(ev.pointerId)
-  invariant(g)
+  invariant(pointer?.id === ev.pointerId)
+  if (pointer.state === 'down') {
+    pointer = {
+      id: pointer.id,
+      state: 'drag',
+      origin: pointer.position,
+      position: new Vec2(ev.clientX, ev.clientY),
+    }
+  } else {
+    invariant(pointer.state === 'drag')
+    pointer.position = new Vec2(ev.clientX, ev.clientY)
+  }
   g.position.set(ev.clientX, ev.clientY)
 }
 
 document.addEventListener('pointerdown', (ev) => {
-  const g = app.stage.addChild(
-    new Graphics({
-      position: { x: ev.clientX, y: ev.clientY },
-    }),
-  )
-  g.circle(0, 0, 10)
-  g.fill('blue')
+  if (!pointer) {
+    pointer = {
+      id: ev.pointerId,
+      state: 'down',
+      position: new Vec2(ev.clientX, ev.clientY),
+    }
+  } else {
+    invariant(pointer.id !== ev.pointerId)
+  }
 
-  invariant(!pointerIdToGraphics.has(ev.pointerId))
-  pointerIdToGraphics.set(ev.pointerId, g)
+  g.visible = true
+  g.position.set(ev.clientX, ev.clientY)
 
   const controller = new AbortController()
   const { signal } = controller
 
   signal.addEventListener('abort', () => {
-    invariant(pointerIdToGraphics.has(ev.pointerId))
-    pointerIdToGraphics.delete(ev.pointerId)
-    g.destroy()
+    g.visible = false
+    pointer = null
   })
+
+  function filterPointerId(fn: (ev: PointerEvent) => void) {
+    return (ev: PointerEvent) => {
+      invariant(pointer)
+      if (ev.pointerId === pointer.id) {
+        fn(ev)
+      }
+    }
+  }
 
   // prettier-ignore
   {
-    document.addEventListener('pointermove', onPointerMove, { signal })
-    document.addEventListener('pointerup', () => controller.abort(), { signal })
-    document.addEventListener('pointercancel', () => controller.abort(), { signal })
-    document.addEventListener('pointerleave', () => controller.abort(), { signal })
+    document.addEventListener('pointermove', filterPointerId(onPointerMove), { signal })
+    document.addEventListener('pointerup', filterPointerId(() => controller.abort()), { signal })
+    document.addEventListener('pointercancel', filterPointerId(() => controller.abort()), { signal })
+    document.addEventListener('pointerleave', filterPointerId(() => controller.abort()), { signal })
   }
 })
