@@ -39,3 +39,11 @@ document.addEventListener(
   },
   { passive: false },
 )
+
+document.addEventListener(
+  'touchstart',
+  (ev) => {
+    ev.preventDefault()
+  },
+  { passive: false },
+)
