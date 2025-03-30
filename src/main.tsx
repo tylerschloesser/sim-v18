@@ -1,4 +1,4 @@
-import { Application } from 'pixi.js'
+import { Application, Graphics } from 'pixi.js'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import invariant from 'tiny-invariant'
@@ -33,3 +33,7 @@ app.init({
   canvas,
   resizeTo: window,
 })
+
+const g = app.stage.addChild(new Graphics())
+g.rect(0, 0, 100, 100)
+g.fill('blue')
