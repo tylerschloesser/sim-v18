@@ -45,13 +45,13 @@ app.init({
   resizeTo: window,
 })
 
-const pointerContainer = app.stage.addChild(
-  new PointerContainer(),
-)
-
 // @ts-expect-error
 const gridContainer = app.stage.addChild(
   new GridContainer({ camera, viewport, scale }),
+)
+
+const pointerContainer = app.stage.addChild(
+  new PointerContainer(),
 )
 
 let pointer: Pointer | null = null
