@@ -31,19 +31,27 @@ const callback: FrameRequestCallback = () => {
 }
 self.requestAnimationFrame(callback)
 
-document.addEventListener(
-  'pointerdown',
-  (ev) => {
-    ev.preventDefault()
-    appendLog(`pointerdown: ${ev.clientX}, ${ev.clientY}`)
-  },
-  { passive: false },
-)
+// document.addEventListener(
+//   'pointerdown',
+//   (ev) => {
+//     ev.preventDefault()
+//     appendLog(`pointerdown: ${ev.clientX}, ${ev.clientY}`)
+//   },
+//   { passive: false },
+// )
 
 document.addEventListener(
   'touchstart',
   (ev) => {
     ev.preventDefault()
+    if (ev.touches.length !== 1) {
+      return
+    }
+    const touch = ev.touches[0]
+    invariant(touch)
+    appendLog(
+      `touchstart: ${touch.clientX}, ${touch.clientY}`,
+    )
   },
   { passive: false },
 )
