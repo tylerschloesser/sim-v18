@@ -106,6 +106,10 @@ async function main() {
     const { signal } = controller
 
     signal.addEventListener('abort', () => {
+      if (pointer?.state === 'drag') {
+        const d = pointer.current.sub(pointer.origin)
+        player.velocity = d.div(scale).mul(-1)
+      }
       pointer = null
       pointerContainer.update(pointer)
     })
@@ -123,11 +127,11 @@ async function main() {
 
     // prettier-ignore
     {
-    document.addEventListener('pointermove', filterPointerId(onPointerMove), { signal })
-    document.addEventListener('pointerup', filterPointerId(() => controller.abort()), { signal })
-    document.addEventListener('pointercancel', filterPointerId(() => controller.abort()), { signal })
-    document.addEventListener('pointerleave', filterPointerId(() => controller.abort()), { signal })
-  }
+      document.addEventListener('pointermove', filterPointerId(onPointerMove), { signal })
+      document.addEventListener('pointerup', filterPointerId(() => controller.abort()), { signal })
+      document.addEventListener('pointercancel', filterPointerId(() => controller.abort()), { signal })
+      document.addEventListener('pointerleave', filterPointerId(() => controller.abort()), { signal })
+    }
   })
 
   let lastFrame = performance.now()
