@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import invariant from 'tiny-invariant'
 import { GridContainer } from './grid-container'
 import './index.css'
+import { PlayerContainer } from './player-container'
 import { PointerContainer } from './pointer-container'
 import { Pointer } from './schema'
 import { Vec2 } from './vec2'
@@ -62,6 +63,11 @@ async function main() {
 
   const pointerContainer = app.stage.addChild(
     new PointerContainer(),
+  )
+
+  // @ts-expect-error
+  const playerContainer = app.stage.addChild(
+    new PlayerContainer({ viewport, scale }),
   )
 
   let pointer: Pointer | null = null
