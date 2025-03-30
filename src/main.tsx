@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import invariant from 'tiny-invariant'
 import './index.css'
+import { Pointer } from './schema'
 import { Vec2 } from './vec2'
 
 const container = document.getElementById('root')
@@ -35,19 +36,6 @@ app.init({
   resizeTo: window,
 })
 
-interface DownPointer {
-  id: number
-  state: 'down'
-  position: Vec2
-}
-
-interface DragPointer {
-  id: number
-  state: 'drag'
-  origin: Vec2
-  position: Vec2
-}
-
 const g = app.stage.addChild(
   new Graphics({ visible: false }),
 )
@@ -56,8 +44,6 @@ g.stroke({
   color: 'blue',
   width: 4,
 })
-
-type Pointer = DownPointer | DragPointer
 
 let pointer: Pointer | null = null
 
