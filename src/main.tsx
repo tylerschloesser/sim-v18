@@ -49,12 +49,12 @@ function onPointerMove(ev: PointerEvent) {
     pointer = {
       id: pointer.id,
       state: 'drag',
-      origin: pointer.position,
-      position: new Vec2(ev.clientX, ev.clientY),
+      origin: pointer.current,
+      current: new Vec2(ev.clientX, ev.clientY),
     }
   } else {
     invariant(pointer.state === 'drag')
-    pointer.position = new Vec2(ev.clientX, ev.clientY)
+    pointer.current = new Vec2(ev.clientX, ev.clientY)
   }
   pointerContainer.update(pointer)
 }
@@ -68,7 +68,7 @@ document.addEventListener('pointerdown', (ev) => {
   pointer = {
     id: ev.pointerId,
     state: 'down',
-    position: new Vec2(ev.clientX, ev.clientY),
+    current: new Vec2(ev.clientX, ev.clientY),
   }
 
   pointerContainer.update(pointer)
