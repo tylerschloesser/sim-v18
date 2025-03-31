@@ -61,6 +61,8 @@ async function main() {
     eventMode: 'none',
     canvas,
     resizeTo: window,
+    resolution: window.devicePixelRatio,
+    autoDensity: true,
   })
 
   const gridContainer = app.stage.addChild(
