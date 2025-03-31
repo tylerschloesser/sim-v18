@@ -7,6 +7,11 @@ interface ConstructorArgs {
   scale: number
 }
 
+const LINES = [
+  { y: 0, color: 'yellow' },
+  { y: 10, color: 'green' },
+]
+
 export class WorldContainer extends Container {
   private __scale: number
   constructor({
@@ -17,12 +22,12 @@ export class WorldContainer extends Container {
     super()
     this.__scale = scale
 
-    const g = this.addChild(new Graphics())
-
-    g.moveTo(0, viewport.y / 2)
-    g.lineTo(viewport.x, viewport.y / 2)
-
-    g.stroke({ width: 2, color: 'yellow' })
+    for (const { y, color } of LINES) {
+      const g = this.addChild(new Graphics())
+      g.moveTo(0, viewport.y / 2 + -y * scale)
+      g.lineTo(viewport.x, viewport.y / 2 + -y * scale)
+      g.stroke({ width: 2, color })
+    }
 
     this.update(camera)
   }

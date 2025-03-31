@@ -118,10 +118,9 @@ async function main() {
     signal.addEventListener('abort', () => {
       if (pointer?.state === 'drag') {
         const d = pointer.current.sub(pointer.origin)
-        player.velocity = d
-          .div(scale)
-          .mul(-1)
-          .mul(DRAG_VELOCITY_SCALE)
+        player.velocity = player.velocity.add(
+          d.div(scale).mul(-1).mul(DRAG_VELOCITY_SCALE),
+        )
       }
       pointer = null
       pointerContainer.update(pointer)
