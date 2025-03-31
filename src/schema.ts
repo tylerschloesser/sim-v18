@@ -16,6 +16,7 @@ export interface DragPointer {
 export type Pointer = DownPointer | DragPointer
 
 export interface Line {
+  id: string
   a: Vec2
   b: Vec2
 }

@@ -60,9 +60,16 @@ async function main() {
 
   const app = new Application()
 
-  const lines: Line[] = [
-    { a: new Vec2(5, -8), b: new Vec2(3, -4) },
-  ]
+  const lines: Record<string, Line> = {}
+
+  function addLine(line: Line): void {
+    lines[line.id] = line
+  }
+  addLine({
+    id: '0',
+    a: new Vec2(5, -8),
+    b: new Vec2(3, -4),
+  })
 
   await app.init({
     antialias: true,
@@ -82,7 +89,7 @@ async function main() {
   )
 
   const bodyContainer = app.stage.addChild(new Container())
-  for (const line of lines) {
+  for (const line of Object.values(lines)) {
     const g = bodyContainer.addChild(new Graphics())
     g.moveTo(line.a.x * scale, line.a.y * scale)
     g.lineTo(line.b.x * scale, line.b.y * scale)
@@ -227,8 +234,12 @@ async function main() {
         player.velocity.mul((dt * timeScale) / 1000),
       )
 
-      const check = { a: lastPosition, b: nextPosition }
-      for (const line of lines) {
+      const check = {
+        id: 'check',
+        a: lastPosition,
+        b: nextPosition,
+      }
+      for (const line of Object.values(lines)) {
         if (
           doIntersectBbox(check, line) &&
           doIntersect(check, line)
