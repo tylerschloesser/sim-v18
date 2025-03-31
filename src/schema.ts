@@ -15,7 +15,7 @@ export interface DragPointer {
 
 export type Pointer = DownPointer | DragPointer
 
-export interface Body {
-  current: Vec2
-  radius: number
+export interface Line {
+  a: Vec2
+  b: Vec2
 }

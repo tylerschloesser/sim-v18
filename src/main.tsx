@@ -9,9 +9,13 @@ import {
 } from './const'
 import { GridContainer } from './grid-container'
 import './index.css'
+import {
+  doIntersect,
+  doIntersectBbox,
+} from './line-segment-intersection'
 import { PlayerContainer } from './player-container'
 import { PointerContainer } from './pointer-container'
-import { Body, Pointer } from './schema'
+import { Line, Pointer } from './schema'
 import { Vec2 } from './vec2'
 import { WorldContainer } from './world-container'
 
@@ -56,8 +60,8 @@ async function main() {
 
   const app = new Application()
 
-  const bodies: Body[] = [
-    { current: new Vec2(0, -10), radius: 4 },
+  const lines: Line[] = [
+    { a: new Vec2(5, -8), b: new Vec2(3, -4) },
   ]
 
   await app.init({
@@ -78,14 +82,11 @@ async function main() {
   )
 
   const bodyContainer = app.stage.addChild(new Container())
-  for (const body of bodies) {
+  for (const line of lines) {
     const g = bodyContainer.addChild(new Graphics())
-    g.circle(
-      body.current.x * scale,
-      body.current.y * scale,
-      body.radius * scale,
-    )
-    g.fill('red')
+    g.moveTo(line.a.x * scale, line.a.y * scale)
+    g.lineTo(line.b.x * scale, line.b.y * scale)
+    g.stroke({ width: 2, color: 'red' })
   }
   function updateBodyContainer() {
     const { x, y } = camera.mul(-scale).add(viewport.div(2))
@@ -139,9 +140,7 @@ async function main() {
 
     signal.addEventListener('abort', () => {
       if (pointer?.state === 'drag') {
-        const d = pointer.current
-          .sub(pointer.origin)
-          .map((v) => new Vec2(v.x * 0.1, v.y))
+        const d = pointer.current.sub(pointer.origin)
         player.velocity = player.velocity.add(
           d.div(scale).mul(-1).mul(DRAG_VELOCITY_SCALE),
         )
@@ -223,9 +222,22 @@ async function main() {
     }
 
     if (player.velocity.isNonZero()) {
-      player.current = player.current.add(
+      const lastPosition = player.current
+      const nextPosition = player.current.add(
         player.velocity.mul((dt * timeScale) / 1000),
       )
+
+      const check = { a: lastPosition, b: nextPosition }
+      for (const line of lines) {
+        if (
+          doIntersectBbox(check, line) &&
+          doIntersect(check, line)
+        ) {
+          console.log('intersect!')
+        }
+      }
+
+      player.current = nextPosition
       camera = player.current
       gridContainer.update(camera)
       worldContainer.update(camera)
