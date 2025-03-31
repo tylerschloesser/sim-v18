@@ -13,6 +13,7 @@ import { PlayerContainer } from './player-container'
 import { PointerContainer } from './pointer-container'
 import { Pointer } from './schema'
 import { Vec2 } from './vec2'
+import { WorldContainer } from './world-container'
 
 async function main() {
   const container = document.getElementById('root')
@@ -64,6 +65,10 @@ async function main() {
 
   const gridContainer = app.stage.addChild(
     new GridContainer({ camera, viewport, scale }),
+  )
+
+  const worldContainer = app.stage.addChild(
+    new WorldContainer({ camera, viewport, scale }),
   )
 
   const pointerContainer = app.stage.addChild(
@@ -191,6 +196,7 @@ async function main() {
       )
       camera = player.current
       gridContainer.update(camera)
+      worldContainer.update(camera)
     }
 
     self.requestAnimationFrame(callback)

@@ -15,7 +15,7 @@ export class PlayerContainer extends Container {
         position: viewport.div(2),
       }),
     )
-    g.circle(0, 0, scale / 2)
+    g.circle(0, 0, scale * 0.2)
     g.fill('blue')
     g.stroke({ color: 'gray', width: 2 })
   }

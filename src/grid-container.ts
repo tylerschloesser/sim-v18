@@ -39,7 +39,7 @@ export class GridContainer extends Container {
       this.g.lineTo(xx * scale, y * scale)
     }
 
-    this.g.stroke({ width: 2, color: 'gray' })
+    this.g.stroke({ width: 2, color: 'hsl(0, 0%, 20%)' })
 
     this.update(camera)
   }
