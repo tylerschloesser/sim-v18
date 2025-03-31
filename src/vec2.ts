@@ -87,6 +87,9 @@ export class Vec2 {
   dot(v: Vec2 | ZVec2): number {
     return this.x * v.x + this.y * v.y
   }
+  map(fn: (v: Vec2) => Vec2): Vec2 {
+    return fn(this)
+  }
 
   static ZERO = new Vec2(0, 0)
 

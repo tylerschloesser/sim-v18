@@ -57,7 +57,7 @@ async function main() {
   const app = new Application()
 
   const bodies: Body[] = [
-    { current: new Vec2(0, -5), radius: 1 },
+    { current: new Vec2(0, -10), radius: 4 },
   ]
 
   await app.init({
@@ -139,7 +139,9 @@ async function main() {
 
     signal.addEventListener('abort', () => {
       if (pointer?.state === 'drag') {
-        const d = pointer.current.sub(pointer.origin)
+        const d = pointer.current
+          .sub(pointer.origin)
+          .map((v) => new Vec2(v.x * 0.1, v.y))
         player.velocity = player.velocity.add(
           d.div(scale).mul(-1).mul(DRAG_VELOCITY_SCALE),
         )
@@ -190,6 +192,8 @@ async function main() {
     const dt = Math.min(now - lastFrame, (1 / 30) * 1000)
     lastFrame = now
 
+    let timeScale = 1
+
     let acceleration = Vec2.ZERO
     if (player.current.y < 0) {
       const scale =
@@ -205,15 +209,22 @@ async function main() {
       acceleration = new Vec2(0, -1).mul(scale)
     }
 
+    if (pointer?.state === 'drag') {
+      const d = pointer.current
+        .sub(pointer.origin)
+        .div(scale)
+      timeScale = Math.min(1 / Math.pow(d.length(), 0.8), 1)
+    }
+
     if (acceleration.isNonZero()) {
       player.velocity = player.velocity.add(
-        acceleration.mul(dt / 1000),
+        acceleration.mul((dt * timeScale) / 1000),
       )
     }
 
     if (player.velocity.isNonZero()) {
       player.current = player.current.add(
-        player.velocity.mul(dt / 1000),
+        player.velocity.mul((dt * timeScale) / 1000),
       )
       camera = player.current
       gridContainer.update(camera)
