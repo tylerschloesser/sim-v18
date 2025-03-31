@@ -1,17 +1,17 @@
-import { Application } from 'pixi.js'
+import { Application, Container, Graphics } from 'pixi.js'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import invariant from 'tiny-invariant'
 import {
-  DRAG_VELOCITY_SCALE,
   ASCENDING_GRAVITY_SCALE,
   DESCENDING_GRAVITY_SCALE,
+  DRAG_VELOCITY_SCALE,
 } from './const'
 import { GridContainer } from './grid-container'
 import './index.css'
 import { PlayerContainer } from './player-container'
 import { PointerContainer } from './pointer-container'
-import { Pointer } from './schema'
+import { Body, Pointer } from './schema'
 import { Vec2 } from './vec2'
 import { WorldContainer } from './world-container'
 
@@ -50,11 +50,15 @@ async function main() {
   }
 
   const player: Player = {
-    current: new Vec2(0, 0),
-    velocity: new Vec2(1, 0),
+    current: Vec2.ZERO,
+    velocity: Vec2.ZERO,
   }
 
   const app = new Application()
+
+  const bodies: Body[] = [
+    { current: new Vec2(0, -5), radius: 1 },
+  ]
 
   await app.init({
     antialias: true,
@@ -72,6 +76,22 @@ async function main() {
   const worldContainer = app.stage.addChild(
     new WorldContainer({ camera, viewport, scale }),
   )
+
+  const bodyContainer = app.stage.addChild(new Container())
+  for (const body of bodies) {
+    const g = bodyContainer.addChild(new Graphics())
+    g.circle(
+      body.current.x * scale,
+      body.current.y * scale,
+      body.radius * scale,
+    )
+    g.fill('red')
+  }
+  function updateBodyContainer() {
+    const { x, y } = camera.mul(-scale).add(viewport.div(2))
+    bodyContainer.position.set(x, y)
+  }
+  updateBodyContainer()
 
   const pointerContainer = app.stage.addChild(
     new PointerContainer(),
@@ -198,6 +218,7 @@ async function main() {
       camera = player.current
       gridContainer.update(camera)
       worldContainer.update(camera)
+      updateBodyContainer()
     }
 
     self.requestAnimationFrame(callback)
